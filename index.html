@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Бағалау шкаласы және калькуляторы</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .grade-badge-5 { background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .grade-badge-4 { background-color: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+        .grade-badge-3 { background-color: #fef9c3; color: #854d0e; border: 1px solid #fef08a; }
+        .grade-badge-2 { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+    </style>
+</head>
+<body class="text-slate-800 min-h-screen flex flex-col justify-between">
+
+    <header class="bg-indigo-600 text-white shadow-md">
+        <div class="max-w-6xl mx-auto px-4 py-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white/10 p-3 rounded-xl backdrop-blur-sm">
+                    <i class="fa-solid fa-calculator text-2xl text-yellow-300"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold">Бағалау Кестесі & Калькулятор</h1>
+                    <p class="text-indigo-200 text-xs sm:text-sm">БЖБ / ТЖБ баллдарын бағаға автоматты түрде ауыстыру</p>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="switchTab('calculator')" id="calcTabBtn" class="px-4 py-2 rounded-lg font-medium text-sm transition bg-white text-indigo-600 shadow">
+                    <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Калькулятор
+                </button>
+                <button onclick="switchTab('table')" id="tableTabBtn" class="px-4 py-2 rounded-lg font-medium text-sm transition bg-indigo-700 text-indigo-100 hover:bg-indigo-800">
+                    <i class="fa-solid fa-table-list mr-1"></i> Толық Кесте
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-8 w-full flex-grow">
+
+        <!-- CALCULATOR TAB -->
+        <div id="calculatorTab" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Interactive Form -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between space-y-6">
+                    <div>
+                        <h2 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-sliders text-indigo-500"></i> Баллды есептеу
+                        </h2>
+
+                        <!-- Max Score Selector -->
+                        <div class="mb-5">
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Максималды балл (Тест/Жұмыс жиынтығы):</label>
+                            <select id="maxScoreSelect" onchange="updateCalculator()" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none transition font-medium">
+                                <!-- Generated dynamically -->
+                            </select>
+                        </div>
+
+                        <!-- Earned Score Input -->
+                        <div class="mb-5">
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Жинаған балл:</label>
+                            <div class="flex items-center gap-3">
+                                <input type="number" id="earnedScoreInput" min="0" value="0" oninput="updateCalculator()" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-xl text-lg font-semibold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition">
+                                <span id="maxScoreDisplay" class="text-slate-500 text-lg font-medium whitespace-nowrap">/ 30</span>
+                            </div>
+                        </div>
+
+                        <!-- Range Slider -->
+                        <div class="mb-2">
+                            <input type="range" id="scoreRange" min="0" max="30" value="0" oninput="syncFromRange()" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        </div>
+                    </div>
+
+                    <!-- Quick Preset Buttons -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Жиі қолданылатын максималды балл:</label>
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="setMaxPreset(10)" class="px-3 py-1.5 text-xs font-medium bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition border border-slate-200">10 балл</button>
+                            <button onclick="setMaxPreset(15)" class="px-3 py-1.5 text-xs font-medium bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition border border-slate-200">15 балл</button>
+                            <button onclick="setMaxPreset(20)" class="px-3 py-1.5 text-xs font-medium bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition border border-slate-200">20 балл</button>
+                            <button onclick="setMaxPreset(25)" class="px-3 py-1.5 text-xs font-medium bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition border border-slate-200">25 балл</button>
+                            <button onclick="setMaxPreset(30)" class="px-3 py-1.5 text-xs font-medium bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition border border-slate-200">30 балл</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Result Card -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between items-center text-center">
+                    <div class="w-full">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Есептеу нәтижесі</span>
+                        
+                        <!-- Grade Display -->
+                        <div id="gradeContainer" class="my-6 p-6 rounded-2xl transition-all duration-300 flex flex-col items-center justify-center border">
+                            <div class="text-sm font-medium mb-1 opacity-80">Қойылатын баға:</div>
+                            <div id="resultGrade" class="text-6xl font-black mb-2">-</div>
+                            <div id="resultText" class="text-sm font-semibold tracking-wide">Баллды енгізіңіз</div>
+                        </div>
+
+                        <!-- Score info -->
+                        <div class="grid grid-cols-2 gap-4 text-left w-full">
+                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                <span class="text-xs text-slate-500 block">Пайыздық көрсеткіш</span>
+                                <span id="resultPercent" class="text-lg font-bold text-slate-700">0%</span>
+                            </div>
+                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                <span class="text-xs text-slate-500 block">Осы баллдағы интервал</span>
+                                <span id="resultRange" class="text-sm font-bold text-slate-700">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feedback note -->
+                    <p class="text-xs text-slate-400 mt-4">
+                        <i class="fa-solid fa-circle-info mr-1"></i> Нәтиже бекітілген бағалау кестесінің ресми стандарты бойынша анықталады.
+                    </p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-xl text-center">
+                    <span class="text-2xl font-black text-emerald-700 block mb-1">«5»</span>
+                    <span class="text-xs font-semibold text-emerald-800 uppercase block">Өте жақсы</span>
+                    <span id="rangeFor5" class="text-xs text-emerald-600 font-medium">85% - 100%</span>
+                </div>
+                <div class="bg-blue-50 border border-blue-200 p-4 rounded-xl text-center">
+                    <span class="text-2xl font-black text-blue-700 block mb-1">«4»</span>
+                    <span class="text-xs font-semibold text-blue-800 uppercase block">Жақсы</span>
+                    <span id="rangeFor4" class="text-xs text-blue-600 font-medium">65% - 84%</span>
+                </div>
+                <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl text-center">
+                    <span class="text-2xl font-black text-amber-700 block mb-1">«3»</span>
+                    <span class="text-xs font-semibold text-amber-800 uppercase block">Қанағаттанарлық</span>
+                    <span id="rangeFor3" class="text-xs text-amber-600 font-medium">40% - 64%</span>
+                </div>
+                <div class="bg-rose-50 border border-rose-200 p-4 rounded-xl text-center">
+                    <span class="text-2xl font-black text-rose-700 block mb-1">«2»</span>
+                    <span class="text-xs font-semibold text-rose-800 uppercase block">Қанағатсыз</span>
+                    <span id="rangeFor2" class="text-xs text-rose-600 font-medium">0% - 39%</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="tableTab" class="hidden space-y-4">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-4 sm:p-6 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800">Ресми Бағалау Кестесі</h2>
+                        <p class="text-xs text-slate-500">Суреттегі бекітілген стандартты балл мен баға сәйкестігі</p>
+                    </div>
+                    <div class="relative w-full sm:w-64">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                        <input type="text" id="tableSearch" oninput="filterTable()" placeholder="Балл бойынша іздеу..." class="w-full pl-9 pr-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-600 text-xs font-bold uppercase tracking-wider border-b border-slate-200">
+                                <th class="py-3.5 px-4 text-center">Макс. Балл</th>
+                                <th class="py-3.5 px-4 text-center text-emerald-700 bg-emerald-50/50">«5» (Өте жақсы)</th>
+                                <th class="py-3.5 px-4 text-center text-blue-700 bg-blue-50/50">«4» (Жақсы)</th>
+                                <th class="py-3.5 px-4 text-center text-amber-700 bg-amber-50/50">«3» (Қанағат)</th>
+                                <th class="py-3.5 px-4 text-center text-rose-700 bg-rose-50/50">«2» (Қанағатсыз)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gradingTableBody" class="divide-y divide-slate-200 text-sm font-medium">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500">
+        <div class="max-w-6xl mx-auto px-4">
+            Қазақстан Республикасы Оқу-ағарту министрлігінің бағалау стандартына сәйкес дайындалған.
+        </div>
+    </footer>
+
+    <script>
+        // Official grading scale data from image
+        const gradingData = [
+            { max: 3, g5: "3-3", g4: "2-2", g3: "2-1", g2: "0-1" },
+            { max: 4, g5: "4-4", g4: "3-3", g3: "2-2", g2: "1-0" },
+            { max: 5, g5: "5-5", g4: "4-4", g3: "2-3", g2: "0-1" },
+            { max: 6, g5: "6-6", g4: "4-5", g3: "3-3", g2: "0-2" },
+            { max: 7, g5: "6-7", g4: "5-5", g3: "3-4", g2: "0-2" },
+            { max: 8, g5: "7-8", g4: "6-6", g3: "4-5", g2: "0-3" },
+            { max: 9, g5: "8-9", g4: "6-7", g3: "4-5", g2: "0-3" },
+            { max: 10, g5: "9-10", g4: "7-8", g3: "4-6", g2: "0-3" },
+            { max: 11, g5: "10-11", g4: "8-9", g3: "5-7", g2: "0-4" },
+            { max: 12, g5: "11-12", g4: "8-10", g3: "5-7", g2: "0-4" },
+            { max: 13, g5: "12-13", g4: "9-11", g3: "6-8", g2: "0-5" },
+            { max: 14, g5: "12-14", g4: "10-11", g3: "6-9", g2: "0-5" },
+            { max: 15, g5: "13-15", g4: "10-12", g3: "6-9", g2: "0-5" },
+            { max: 16, g5: "14-16", g4: "11-13", g3: "7-10", g2: "0-6" },
+            { max: 17, g5: "15-17", g4: "12-14", g3: "7-11", g2: "0-6" },
+            { max: 18, g5: "16-18", g4: "12-15", g3: "8-11", g2: "0-7" },
+            { max: 19, g5: "17-19", g4: "13-16", g3: "8-12", g2: "0-7" },
+            { max: 20, g5: "17-20", g4: "13-16", g3: "8-12", g2: "0-7" },
+            { max: 21, g5: "18-21", g4: "14-17", g3: "9-13", g2: "0-8" },
+            { max: 22, g5: "19-22", g4: "15-18", g3: "9-14", g2: "0-8" },
+            { max: 23, g5: "20-23", g4: "15-19", g3: "10-14", g2: "0-9" },
+            { max: 24, g5: "21-24", g4: "16-20", g3: "10-15", g2: "0-9" },
+            { max: 25, g5: "22-25", g4: "17-21", g3: "10-16", g2: "0-9" },
+            { max: 30, g5: "26-30", g4: "20-25", g3: "12-19", g2: "0-11" }
+        ];
+
+        // Parse range string "min-max" into array [min, max]
+        function parseRange(rangeStr) {
+            if (!rangeStr) return [0, 0];
+            const parts = rangeStr.split('-').map(Number);
+            return [Math.min(...parts), Math.max(...parts)];
+        }
+
+        // Initialize application on page load
+        window.onload = function() {
+            populateMaxScoreSelect();
+            populateTable();
+            updateCalculator();
+        };
+
+        // Populate dropdown with available max scores
+        function populateMaxScoreSelect() {
+            const select = document.getElementById('maxScoreSelect');
+            select.innerHTML = '';
+            gradingData.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item.max;
+                opt.textContent = `${item.max} балл`;
+                if (item.max === 30) opt.selected = true;
+                select.appendChild(opt);
+            });
+        }
+
+        // Render full table
+        function populateTable() {
+            const tbody = document.getElementById('gradingTableBody');
+            tbody.innerHTML = '';
+            
+            gradingData.forEach((row, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = idx % 2 === 0 ? 'bg-white hover:bg-slate-50' : 'bg-slate-50/60 hover:bg-slate-50';
+                
+                tr.innerHTML = `
+                    <td class="py-3 px-4 font-bold text-slate-800 text-center border-r border-slate-200">${row.max} балл</td>
+                    <td class="py-3 px-4 text-center text-emerald-800 font-semibold bg-emerald-50/20">${row.g5}</td>
+                    <td class="py-3 px-4 text-center text-blue-800 font-semibold bg-blue-50/20">${row.g4}</td>
+                    <td class="py-3 px-4 text-center text-amber-800 font-semibold bg-amber-50/20">${row.g3}</td>
+                    <td class="py-3 px-4 text-center text-rose-800 font-semibold bg-rose-50/20">${row.g2}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Tab Switching
+        function switchTab(tabName) {
+            const calcTab = document.getElementById('calculatorTab');
+            const tableTab = document.getElementById('tableTab');
+            const calcBtn = document.getElementById('calcTabBtn');
+            const tableBtn = document.getElementById('tableTabBtn');
+
+            if (tabName === 'calculator') {
+                calcTab.classList.remove('hidden');
+                tableTab.classList.add('hidden');
+                calcBtn.className = "px-4 py-2 rounded-lg font-medium text-sm transition bg-white text-indigo-600 shadow";
+                tableBtn.className = "px-4 py-2 rounded-lg font-medium text-sm transition bg-indigo-700 text-indigo-100 hover:bg-indigo-800";
+            } else {
+                calcTab.classList.add('hidden');
+                tableTab.classList.remove('hidden');
+                tableBtn.className = "px-4 py-2 rounded-lg font-medium text-sm transition bg-white text-indigo-600 shadow";
+                calcBtn.className = "px-4 py-2 rounded-lg font-medium text-sm transition bg-indigo-700 text-indigo-100 hover:bg-indigo-800";
+            }
+        }
+
+        // Preset button click
+        function setMaxPreset(val) {
+            const select = document.getElementById('maxScoreSelect');
+            select.value = val;
+            updateCalculator();
+        }
+
+        // Range input sync
+        function syncFromRange() {
+            const rangeVal = document.getElementById('scoreRange').value;
+            document.getElementById('earnedScoreInput').value = rangeVal;
+            updateCalculator(false);
+        }
+
+        // Main Calculation Logic
+        function updateCalculator(updateRange = true) {
+            const maxScore = parseInt(document.getElementById('maxScoreSelect').value) || 30;
+            const inputElem = document.getElementById('earnedScoreInput');
+            let earnedScore = parseInt(inputElem.value) || 0;
+
+            // Bounds check
+            if (earnedScore < 0) earnedScore = 0;
+            if (earnedScore > maxScore) earnedScore = maxScore;
+            inputElem.value = earnedScore;
+
+            // Update DOM limits
+            document.getElementById('maxScoreDisplay').textContent = `/ ${maxScore}`;
+            const rangeElem = document.getElementById('scoreRange');
+            rangeElem.max = maxScore;
+            if (updateRange) rangeElem.value = earnedScore;
+
+            // Find scale object
+            const dataRow = gradingData.find(d => d.max === maxScore);
+
+            // Update Summary ranges
+            if (dataRow) {
+                document.getElementById('rangeFor5').textContent = `${dataRow.g5} балл`;
+                document.getElementById('rangeFor4').textContent = `${dataRow.g4} балл`;
+                document.getElementById('rangeFor3').textContent = `${dataRow.g3} балл`;
+                document.getElementById('rangeFor2').textContent = `${dataRow.g2} балл`;
+            }
+
+            // Calculate Grade & Percentage
+            const percent = Math.round((earnedScore / maxScore) * 100);
+            document.getElementById('resultPercent').textContent = `${percent}%`;
+
+            let grade = "-";
+            let gradeText = "";
+            let gradeClass = "";
+            let activeRangeStr = "-";
+
+            if (dataRow) {
+                const r5 = parseRange(dataRow.g5);
+                const r4 = parseRange(dataRow.g4);
+                const r3 = parseRange(dataRow.g3);
+                const r2 = parseRange(dataRow.g2);
+
+                if (earnedScore >= r5[0] && earnedScore <= r5[1]) {
+                    grade = "5";
+                    gradeText = "Өте жақсы";
+                    gradeClass = "grade-badge-5";
+                    activeRangeStr = `${dataRow.g5} балл`;
+                } else if (earnedScore >= r4[0] && earnedScore <= r4[1]) {
+                    grade = "4";
+                    gradeText = "Жақсы";
+                    gradeClass = "grade-badge-4";
+                    activeRangeStr = `${dataRow.g4} балл`;
+                } else if (earnedScore >= r3[0] && earnedScore <= r3[1]) {
+                    grade = "3";
+                    gradeText = "Қанағаттанарлық";
+                    gradeClass = "grade-badge-3";
+                    activeRangeStr = `${dataRow.g3} балл`;
+                } else {
+                    grade = "2";
+                    gradeText = "Қанағаттанарлықсыз";
+                    gradeClass = "grade-badge-2";
+                    activeRangeStr = `${dataRow.g2} балл`;
+                }
+            }
+
+            // UI Render
+            const container = document.getElementById('gradeContainer');
+            container.className = `my-6 p-6 rounded-2xl transition-all duration-300 flex flex-col items-center justify-center border ${gradeClass}`;
+            document.getElementById('resultGrade').textContent = grade;
+            document.getElementById('resultText').textContent = gradeText;
+            document.getElementById('resultRange').textContent = activeRangeStr;
+        }
+
+        // Table Search Filter
+        function filterTable() {
+            const query = document.getElementById('tableSearch').value.trim().toLowerCase();
+            const rows = document.querySelectorAll('#gradingTableBody tr');
+
+            rows.forEach(row => {
+                const maxVal = row.cells[0].textContent.toLowerCase();
+                if (maxVal.includes(query)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
